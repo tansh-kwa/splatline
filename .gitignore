@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Per-run outputs and large artifacts
+runs/
+*.ply
+*.ksplat
+
+# Model weights are fetched into ./weights, never committed
+weights/
+*.pth
+
+# Local env
+.venv/
+.python-version

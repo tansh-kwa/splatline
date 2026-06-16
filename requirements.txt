@@ -1,0 +1,15 @@
+# Runtime Python deps for splatline (CPU-usable core), pinned for reproducibility.
+#
+# torch, torchvision, gsplat and lang-sam are GPU/CUDA-coupled and are NOT
+# pinned here; install them yourself for your CUDA (setup.sh checks they're present),
+# and gsplat's own example deps are pinned by third_party/gsplat/examples/requirements.txt.
+# Installing torch via pip on an arbitrary host pulls a CPU/mismatched-CUDA wheel and
+# silently disables the GPU stages.
+#
+# numpy is held <2 to match gsplat's trainer requirements.
+
+pyyaml==6.0.2
+numpy==1.26.4
+opencv-python==4.10.0.84
+pillow==10.4.0
+tqdm==4.66.5

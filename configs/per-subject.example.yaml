@@ -1,0 +1,21 @@
+# Per-subject styling (advanced): give different subjects different looks.
+# Run with:  splatline run configs/per-subject.example.yaml
+#
+# Not the default: the simple CLI applies one look to the whole scene. This mode is
+# config-only. `style` is the base look for everything outside the subjects; each subject
+# is matched by text prompt (lang-sam) and rendered in its own look on top.
+#
+# A look is one of: contour | anime | watercolor | photo | white
+scene: tractor-yard
+input: ./scene.mp4          # <-- your video or image directory
+resolution: 512p
+frames: 150
+
+style: white                # base look (white = paper; photo = keep the original)
+subjects:
+  - { prompt: "tractor", style: contour }
+  - { prompt: "barn",    style: watercolor }
+
+# Tip: `style: photo` keeps the original image outside the subjects (the photoreal +
+# stylized "splice" from the post). Or `style: contour` to line-draw the whole world and
+# give one subject `style: photo` for a photoreal subject inside it.

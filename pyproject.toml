@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "splatline"
+version = "0.1.0"
+description = "Turn a video or image set into a stylized 3D Gaussian-splat scene (line-drawing / watercolor / collage)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = [
+    "pyyaml>=6.0",
+    "numpy>=1.23",
+    "opencv-python>=4.7",
+    "pillow>=9.0",
+    "tqdm>=4.64",
+    # torch / torchvision / gsplat / lang-sam are GPU-coupled; install them yourself
+    # for your CUDA (setup.sh checks they're present). See requirements.txt.
+]
+
+[project.scripts]
+splatline = "splatline.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["splatline*"]
