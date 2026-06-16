@@ -33,20 +33,28 @@ fi
 $PY -c "import lang_sam" 2>/dev/null \
     || echo "  note: lang-sam not installed, needed only for --subject collage"
 
-# 2. Pinned submodules: the GAN, and gsplat's example trainer script (used even when
-#    the gsplat *library* is installed separately).
+# 2. Pinned submodules (recursive: gsplat vendors glm and the example libs as nested
+#    submodules; without --recursive the CUDA build fails on a missing glm header).
 echo "==> fetching submodules (informative-drawings GAN, gsplat example trainer)"
-git submodule update --init third_party/informative-drawings third_party/gsplat
+git submodule update --init --recursive third_party/informative-drawings third_party/gsplat
 
-# 3. Python deps. splatline core + the trainer's glue deps + SAM (for --subject collage).
+# 3. Python deps. splatline core + the trainer's glue deps.
 echo "==> installing splatline core deps"
 $PIP install -r requirements.txt
+# Build tools for the CUDA-extension deps below (they build against your installed torch).
+$PIP install wheel setuptools ninja
 
 echo "==> installing gsplat example-trainer deps (skipping NCore/lidar-only extras)"
-# Skip nvidia-ncore / ppisp: needed only for the lidar/NCore data path, not COLMAP.
+# --no-build-isolation: the trainer's CUDA extensions (e.g. fused-ssim) import torch at
+# build time, which an isolated build env doesn't have. Skip nvidia-ncore / ppisp: they
+# are only needed for the lidar/NCore data path, not COLMAP.
 grep -vE '^(nvidia-ncore|ppisp )' third_party/gsplat/examples/requirements.txt > /tmp/splatline-trainer-reqs.txt
-$PIP install -r /tmp/splatline-trainer-reqs.txt
+$PIP install --no-build-isolation -r /tmp/splatline-trainer-reqs.txt
 rm -f /tmp/splatline-trainer-reqs.txt
+
+# The example trainer also needs gsplat's local scene/stage helper libraries.
+echo "==> installing gsplat example scene/stage libs"
+$PIP install --no-build-isolation -e third_party/gsplat/libs/scene -e third_party/gsplat/libs/stage
 
 echo "==> installing the splatline CLI"
 $PIP install -e .

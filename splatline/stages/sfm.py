@@ -14,10 +14,48 @@ from __future__ import annotations
 
 import os
 import shutil
+import struct
 from pathlib import Path
 from typing import List
 
 from .._proc import StageError, run, which_or_raise
+
+
+def _registered_images(images_bin: Path) -> int:
+    """Number of registered images in a COLMAP images.bin (its uint64 header)."""
+    try:
+        with open(images_bin, "rb") as f:
+            return struct.unpack("<Q", f.read(8))[0]
+    except (OSError, struct.error):
+        return 0
+
+
+def _select_best_model(sparse: Path, total: int, logs: Path) -> None:
+    """COLMAP can emit several disconnected sub-models (sparse/0, sparse/1, ...) and the
+    largest is NOT always sparse/0 — but the trainer only reads sparse/0. Pick the model
+    with the most registered images and make it sparse/0; fail if even it is too sparse.
+    """
+    models = [d for d in sorted(sparse.glob("*")) if (d / "images.bin").exists()]
+    if not models:
+        raise StageError(
+            "COLMAP could not reconstruct a model. The capture likely lacks enough "
+            f"overlapping, textured views — add more angles. See {logs / 'sfm_mapper.log'}."
+        )
+    best = max(models, key=lambda d: _registered_images(d / "images.bin"))
+    n_reg = _registered_images(best / "images.bin")
+    if n_reg < max(10, int(0.3 * total)):
+        raise StageError(
+            f"COLMAP only registered {n_reg}/{total} images (largest model) — the "
+            "reconstruction is too sparse to train on. Capture more overlapping, sharp, "
+            f"textured views, or try a higher --resolution. See {logs / 'sfm_mapper.log'}."
+        )
+    target = sparse / "0"
+    if best.resolve() != target.resolve():
+        staged = sparse / "_best"
+        shutil.move(str(best), str(staged))
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.move(str(staged), str(target))
 
 
 def _gpu_flag() -> str:
@@ -73,12 +111,9 @@ def run_sfm(
         label="colmap mapper",
     )
 
-    if not (sparse / "0" / "cameras.bin").exists():
-        raise StageError(
-            "COLMAP could not reconstruct a model (no sparse/0). The capture likely "
-            "lacks enough overlapping, textured views; add more angles. See "
-            f"{logs / 'sfm_mapper.log'}."
-        )
+    # COLMAP may produce several sub-models; keep the largest as sparse/0 (what the
+    # trainer reads), and reject degenerate reconstructions before they reach training.
+    _select_best_model(sparse, total=len(image_paths), logs=logs)
     return colmap_dir
 
 
