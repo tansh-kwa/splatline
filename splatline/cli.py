@@ -2,7 +2,7 @@
 
     splatline run ./my-video.mp4 --style contour             # line drawing
     splatline run ./photos/ --style watercolor               # watercolor
-    splatline run ./my-video.mp4 --subject "tractor"         # collage (subject over white)
+    splatline run ./my-video.mp4 --subject "tractor" --style contour  # collage: tractor in contour, rest blank
     splatline run runs/my-scene/config.yaml                  # re-run / per-subject config
     splatline run ./video.mp4 --from-colmap ./colmap_out     # skip SfM
     splatline check                                          # environment report
@@ -42,7 +42,7 @@ def _config_from_args(args: argparse.Namespace) -> SceneConfig:
         scene=scene,
         input=str(src),
         resolution=args.resolution,
-        frames=args.frames,
+        fps=args.fps,
         from_colmap=args.from_colmap,
         ksplat=args.ksplat,
     )
@@ -100,7 +100,8 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--style", choices=("contour", "anime", "watercolor"), default="contour",
                    help="the look to apply (default: contour)")
     r.add_argument("--resolution", choices=("512p", "720p", "1080p"), default="512p")
-    r.add_argument("--frames", type=int, default=150, help="frame budget from video")
+    r.add_argument("--fps", type=float, default=2.0,
+                   help="sample this many frames per second from a video (default: 2)")
     r.add_argument("--subject", default=None,
                    help="collage: draw only this subject (in --style) over white (lang-sam)")
     r.add_argument("--ksplat", action="store_true", help="also emit a portable .ksplat")

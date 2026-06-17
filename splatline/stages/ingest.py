@@ -1,8 +1,8 @@
 """Ingest: turn the user's input into a normalized set of frames.
 
-Accepts either a video file (sampled to the frame budget, evenly across the clip)
-or a directory of images. Output is always ``frames/frame_0001.png`` ... so that
-filenames stay identical through COLMAP and the line-drawing swap.
+Accepts either a video file (sampled at a fixed frames-per-second) or a directory of
+images. Output is always ``frames/frame_0001.png`` ... so that filenames stay identical
+through COLMAP and the line-drawing swap.
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List
 
-from .._proc import StageError, capture, run, which_or_raise
+from .._proc import StageError, run, which_or_raise
 from ..presets import preset
 
 VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".webm"}
@@ -46,48 +46,16 @@ def _downscale_keep_aspect(img, long_edge: int):
     return cv2.resize(img, new, interpolation=cv2.INTER_AREA)
 
 
-def _video_frame_count(video: Path) -> int:
-    """Best-effort frame count: nb_frames, else duration * avg frame rate."""
-    try:
-        nb = capture([
-            "ffprobe", "-v", "error", "-select_streams", "v:0",
-            "-show_entries", "stream=nb_frames", "-of", "csv=p=0", str(video),
-        ])
-        if nb.isdigit() and int(nb) > 0:
-            return int(nb)
-    except StageError:
-        pass
-    # Fallback: duration * average frame rate
-    dur = capture([
-        "ffprobe", "-v", "error", "-show_entries", "format=duration",
-        "-of", "csv=p=0", str(video),
-    ])
-    rate = capture([
-        "ffprobe", "-v", "error", "-select_streams", "v:0",
-        "-show_entries", "stream=avg_frame_rate", "-of", "csv=p=0", str(video),
-    ])
-    try:
-        num, den = rate.split("/")
-        fps = float(num) / float(den) if float(den) else 0.0
-        return max(1, int(float(dur) * fps))
-    except (ValueError, ZeroDivisionError):
-        raise StageError(f"could not determine frame count for {video}")
-
-
 def sample_video(
-    video: Path, frames_dir: Path, budget: int, long_edge: int, timeout: int
+    video: Path, frames_dir: Path, fps: float, long_edge: int, timeout: int
 ) -> List[Path]:
     which_or_raise("ffmpeg")
-    which_or_raise("ffprobe")
-    total = _video_frame_count(video)
-    step = max(1, total // max(1, budget))
     frames_dir.mkdir(parents=True, exist_ok=True)
-    # Single decode pass: keep every `step`-th frame, downscale, cap at the budget.
+    # Resample the video to `fps` frames/sec and downscale, in a single decode pass.
     run(
         [
             "ffmpeg", "-hide_banner", "-y", "-i", str(video),
-            "-vf", f"select='not(mod(n\\,{step}))',{_ffmpeg_scale(long_edge)}",
-            "-vsync", "0", "-frames:v", str(budget),
+            "-vf", f"fps={fps},{_ffmpeg_scale(long_edge)}",
             str(frames_dir / "frame_%04d.png"),
         ],
         timeout=timeout,
@@ -137,7 +105,7 @@ def ingest(cfg, run_dir: Path) -> List[Path]:
     if src.is_dir():
         return collect_images(src, frames_dir, long_edge)
     if src.suffix.lower() in VIDEO_EXTS:
-        return sample_video(src, frames_dir, cfg.frames, long_edge, cfg.timeouts.ingest)
+        return sample_video(src, frames_dir, cfg.fps, long_edge, cfg.timeouts.ingest)
     raise StageError(
         f"unsupported input {src.name!r}; pass a video ({sorted(VIDEO_EXTS)}) "
         f"or a directory of images"

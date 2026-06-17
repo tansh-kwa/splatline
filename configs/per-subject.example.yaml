@@ -9,7 +9,7 @@
 scene: tractor-yard
 input: ./scene.mp4          # <-- your video or image directory
 resolution: 512p
-frames: 150
+fps: 2                      # frames/sec to sample (ignored for image-directory input)
 
 style: white                # base look (white = paper; photo = keep the original)
 subjects:

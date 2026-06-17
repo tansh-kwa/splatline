@@ -124,7 +124,7 @@ def _apply_rules(r: PreflightReport) -> None:
     if r.n_frames < HARD_MIN_FRAMES:
         r.errors.append(
             f"only {r.n_frames} frames; need at least {HARD_MIN_FRAMES} overlapping "
-            "views. Capture more angles (or raise the frame budget for a video)."
+            "views. Capture more angles (or raise --fps for a video)."
         )
     elif r.n_frames < RECOMMEND_MIN_FRAMES:
         r.warnings.append(

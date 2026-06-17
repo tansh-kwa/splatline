@@ -62,14 +62,17 @@ splatline run ./scene.mp4 --style contour
 # Watercolor: line drawing with a soft color wash
 splatline run ./scene.mp4 --style watercolor
 
-# Collage: draw only a named subject, leave the rest blank (uses lang-sam)
-splatline run ./scene.mp4 --subject "tractor"
+# Collage: draw only the named subject (in --style), leave the rest blank (uses lang-sam)
+splatline run ./scene.mp4 --subject "tractor" --style contour
 ```
+
+`--subject` draws that subject in the chosen `--style` over a blank (white) background;
+the example above renders the tractor as a contour line drawing.
 
 Common options:
 
 - `--resolution 512p|720p|1080p`: higher is sharper but slower and needs more VRAM (default `512p`).
-- `--frames N`: how many frames to sample from a video (default `150`).
+- `--fps F`: frames per second to sample from a video (default `2`).
 - `--ksplat`: also write a compact `scene.ksplat` for sharing (needs Node).
 - `--from-colmap DIR`: reuse a COLMAP result you already have and skip Structure-from-Motion.
 

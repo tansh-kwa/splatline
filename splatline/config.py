@@ -61,7 +61,7 @@ class SceneConfig:
 
     # Geometry / training
     resolution: str = "512p"                      # 512p | 720p | 1080p
-    frames: int = 150                             # frame budget sampled from video
+    fps: float = 2.0                              # sample the video at this many frames/sec
     swap_point: str = "pre-train"                 # pre-train | pre-sfm  (hidden default)
     from_colmap: Optional[str] = None             # reuse prepared COLMAP output, skip SfM
 
@@ -94,10 +94,8 @@ class SceneConfig:
             raise ConfigError(
                 f"swap_point must be one of {SWAP_POINTS}, got {self.swap_point!r}"
             )
-        if self.frames < 8:
-            raise ConfigError(
-                f"frames must be >= 8 (COLMAP needs overlap), got {self.frames}"
-            )
+        if self.fps <= 0:
+            raise ConfigError(f"fps must be > 0, got {self.fps}")
         if not self.scene:
             raise ConfigError("scene name is required")
         if not self.input:
@@ -130,7 +128,7 @@ class SceneConfig:
             "input": self.input,
             "style": self.style,
             "resolution": self.resolution,
-            "frames": self.frames,
+            "fps": self.fps,
         }
         if self.subjects:
             d["subjects"] = [dataclasses.asdict(s) for s in self.subjects]
