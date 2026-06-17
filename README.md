@@ -76,6 +76,23 @@ Common options:
 - `--ksplat`: also write a compact `scene.ksplat` for sharing (needs Node).
 - `--from-colmap DIR`: reuse a COLMAP result you already have and skip Structure-from-Motion.
 
+### Define a run in a config file
+
+Instead of flags, a run can be written as a YAML file and run directly:
+
+```yaml
+# my-run.yaml   ->   splatline run my-run.yaml
+scene: my-scene
+input: ./scene.mp4
+style: watercolor
+resolution: 720p
+fps: 2
+ksplat: true
+```
+
+Every run also writes its resolved config to `runs/<scene>/config.yaml`, so you can
+reproduce or tweak a scene by re-running `splatline run runs/<scene>/config.yaml`.
+
 **Different styles for different subjects.** For finer control, such as a photoreal
 background with a line-drawn subject, write a config file and run it directly. `style` is
 the base look; each subject overrides it:
