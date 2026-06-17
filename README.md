@@ -12,6 +12,8 @@ recovers camera geometry with COLMAP, and trains a Gaussian splat on the redrawn
 The full method and background are in the blog post:
 **[3D Line Drawings](https://amritkwatra.com/experiments/3d-line-drawings)**.
 
+**AI Disclosure**: this repository was put-together using Claude Code, primarily working through Opus 4.8. 
+
 ## Setup
 
 splatline orchestrates a few heavyweight, GPU/CUDA tools that you install **yourself**
@@ -87,9 +89,6 @@ subjects:
 
 A full template is in [`configs/per-subject.example.yaml`](configs/per-subject.example.yaml).
 
-> Running on a headless server (SSH, no display)? COLMAP's GPU feature extraction needs a
-> display; set `SPLATLINE_COLMAP_GPU=0` to use the CPU (slower) or run under `xvfb-run`.
-> Splat training still uses the GPU.
 
 ## License
 
