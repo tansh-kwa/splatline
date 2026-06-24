@@ -1,24 +1,19 @@
 # splatline
 
-Splatline augments the standard pipeline for generating 3D Gaussian splats to create stylized 
+splatline augments the standard pipeline for generating 3D Gaussian splats to create stylized 
 3D scenes that resemble 3D line drawings. The work duct tapes together Caroline Chan's [informative line drawings](https://carolineec.github.io/informative_drawings/)
-with [gsplat's](https://github.com/nerfstudio-project/gsplat) tools for creating 3D Gaussian splats. This project originally used MrNeRF's 3d-gaussian-splatting-cuda, now [LichtFeld Studio](https://github.com/MrNeRF/LichtFeld-Studio). 
+with [gsplat's](https://github.com/nerfstudio-project/gsplat) tools for creating 3D gaussian splats. This project originally used MrNeRF's gaussian-splatting-cuda, now [LichtFeld Studio](https://github.com/MrNeRF/LichtFeld-Studio). 
 
-Splatline works with videos and image collections, and creates .ply scenes. The full method and background are described in this blog post:
-**[3D Line Drawings](https://amritkwatra.com/experiments/3d-line-drawings)**.
+Splatline works with videos and image collections, and creates .ply scenes. The full method and background are described in this blog post: **[3D Line Drawings](https://amritkwatra.com/experiments/3d-line-drawings)**.
 
 > **AI Disclosure:** I used Claude Code to put this repository together.
 
 ## Setup
 
-splatline orchestrates a few heavyweight, GPU/CUDA tools that you install **yourself**
-first; it does not build them for you. You'll want a **modern NVIDIA GPU** (a recent
-driver and a CUDA 12.x stack), since the line-drawing and splat-training stages aren't
-practical on CPU.
+splatline orchestrates a few tools that you install **yourself** first. Splatline does not build them for you. You'll want a **modern NVIDIA GPU**, since COLMAP and splat-training stages aren't practical on CPU. Converting individual images to line drawings is however possible on modern CPUs. 
 
 | Requirement | Used for | Where to install |
 |---|---|---|
-| **PyTorch** (CUDA build) | the line-drawing model | https://pytorch.org/get-started/locally/ |
 | **gsplat** | Gaussian-splat training | https://github.com/nerfstudio-project/gsplat |
 | **COLMAP** | camera poses (Structure-from-Motion) | https://colmap.github.io/install.html |
 | **ffmpeg** | sampling frames from video | https://ffmpeg.org/download.html |
@@ -73,7 +68,7 @@ Common options:
 
 ### Define a run in a config file
 
-Instead of flags, a run can be written as a YAML file and run directly:
+Instead of flags, a run can also be written as a YAML file and run directly:
 
 ```yaml
 # my-run.yaml   ->   splatline run my-run.yaml
