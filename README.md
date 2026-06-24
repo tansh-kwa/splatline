@@ -1,18 +1,13 @@
 # splatline
 
-splatline turns a video (or a set of photos) of a scene into a **3D Gaussian-splat model
-that looks hand-drawn** (a line drawing, a watercolor, or a subject-only collage). It
-stays consistent as you move the camera, because the style is baked into the 3D
-reconstruction rather than painted on at the end.
+Splatline augments the standard pipeline for generating 3D Gaussian splats to create stylized 
+3D scenes that resemble 3D line drawings. The work duct tapes together Caroline Chan's [informative line drawings](https://carolineec.github.io/informative_drawings/)
+with [gsplat's](https://github.com/nerfstudio-project/gsplat) tools for creating 3D Gaussian splats. This project originally used MrNeRF's 3d-gaussian-splatting-cuda, now [LichtFeld Studio](https://github.com/MrNeRF/LichtFeld-Studio). 
 
-You give it footage and a style; it returns a `scene.ply` you can open in any 3D Gaussian
-splat viewer. Under the hood it samples frames, redraws them with a line-drawing model,
-recovers camera geometry with COLMAP, and trains a Gaussian splat on the redrawn images.
-
-The full method and background are in the blog post:
+Splatline works with videos and image collections, and creates .ply scenes. The full method and background are described in this blog post:
 **[3D Line Drawings](https://amritkwatra.com/experiments/3d-line-drawings)**.
 
-> **AI Disclosure:** this repository was put together using Claude Code, primarily working through Opus 4.8.
+> **AI Disclosure:** I used Claude Code to put this repository together.
 
 ## Setup
 
@@ -44,7 +39,7 @@ splatline check
 itself and fetches the model weights.
 
 **Model weights.** The line-drawing model is *informative-drawings* by Chan et al., and its
-pretrained weights come from that project
+pretrained weights come from t
 ([carolineec/informative-drawings](https://github.com/carolineec/informative-drawings)).
 `setup.sh` downloads them automatically into `./weights` (you can re-run
 `scripts/fetch_weights.sh ./weights` at any time). lang-sam fetches its own segmentation
